@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nossas Ideias - Nossa História de Amor V2</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/ideias.css"> <!-- CSS específico para esta página -->
+</head>
+<body>
+    <header>
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <div class="overlay" id="overlay"></div>
+        <h1>Matheus & Samara
+            <img class="coracaoHeader" src="coracaoFundoTransparente.png" alt="foto do coração">
+        </h1>
+        <nav id="mobileNav">
+            <ul>
+                <li><a href="index.html">Início</a></li>
+                <li><a href="caracteristicas.html">Nossas Características</a></li>
+                <li><a href="calendario.html">Nosso Calendário</a></li>
+                <li><a href="cartas.html">Nossas Cartas</a></li>
+                <li><a href="fotos.html">Nossas Fotos</a></li>
+                <li><a href="videos.html">Nossos Vídeos</a></li>
+                <li><a href="ideias.html">Nossas Ideias</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>Nossas Ideias</h1>
+        <p>Aqui podemos registrar todas as nossas ideias para encontros, viagens, hobbies ou qualquer coisa que queiramos fazer juntos. Adicione novas ideias ou remova as que já foram realizadas ou não são mais relevantes.</p>
+
+        <div class="formulario-container">
+            <h2>Adicionar Nova Ideia</h2>
+            <textarea id="ideia-texto" placeholder="Descreva a ideia aqui..."></textarea>
+            <button onclick="adicionarIdeia()">Adicionar Ideia</button>
+        </div>
+
+        <div id="ideias-lista-container">
+            <h2>Lista de Ideias</h2>
+            <!-- Ideias carregadas aqui -->
+        </div>
+
+    </main>
+    <footer>
+        <p>DEVELOPED BY MATHEUS</p>
+    </footer>
+    <script src="js/dados.js"></script> <!-- Carrega os dados base -->
+    <script src="js/script.js"></script>
+    <script src="js/menu.js"></script>
+    <script>
+        // Funções específicas para a página de ideias
+        const IDEIAS_STORAGE_KEY = 'ideiasSiteV2';
+
+        function carregarIdeias() {
+            const listaContainer = document.getElementById('ideias-lista-container');
+            listaContainer.innerHTML = '<h2>Lista de Ideias</h2>'; // Reset and add title
+            
+            let ideiasSalvas = JSON.parse(localStorage.getItem(IDEIAS_STORAGE_KEY)) || JSON.parse(JSON.stringify(dados.ideiasProximidade || []));
+
+            if (ideiasSalvas.length === 0) {
+                listaContainer.innerHTML += '<p>Nenhuma ideia adicionada ainda. Vamos sonhar juntos!</p>';
+                return;
+            }
+
+            ideiasSalvas.forEach((ideia, index) => {
+                const ideiaDiv = document.createElement('div');
+                ideiaDiv.classList.add('ideia-item');
+                ideiaDiv.innerHTML = `<p>${ideia}</p><button class="excluir-btn" onclick="excluirIdeia(${index})">Excluir Ideia</button>`;
+                listaContainer.appendChild(ideiaDiv);
+            });
+        }
+
+        function adicionarIdeia() {
+            const textoInput = document.getElementById('ideia-texto');
+            const texto = textoInput.value.trim();
+
+            if (!texto) {
+                alert('Por favor, descreva a ideia.');
+                return;
+            }
+
+            let ideiasSalvas = JSON.parse(localStorage.getItem(IDEIAS_STORAGE_KEY)) || JSON.parse(JSON.stringify(dados.ideiasProximidade || []));
+            
+            ideiasSalvas.push(texto);
+            localStorage.setItem(IDEIAS_STORAGE_KEY, JSON.stringify(ideiasSalvas));
+            
+            textoInput.value = '';
+            carregarIdeias();
+        }
+
+        function excluirIdeia(index) {
+            if (!confirm('Tem certeza que deseja excluir esta ideia?')) {
+                return;
+            }
+            let ideiasSalvas = JSON.parse(localStorage.getItem(IDEIAS_STORAGE_KEY)) || JSON.parse(JSON.stringify(dados.ideiasProximidade || []));
+            ideiasSalvas.splice(index, 1);
+            localStorage.setItem(IDEIAS_STORAGE_KEY, JSON.stringify(ideiasSalvas));
+            carregarIdeias();
+        }
+
+        document.addEventListener('DOMContentLoaded', carregarIdeias);
+    </script>
+</body>
+</html>

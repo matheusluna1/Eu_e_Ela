@@ -1,0 +1,158 @@
+/* Removido o estilo duplicado do coração, já definido no style.css global */
+/* css/caracteristicas.css */
+.perfis-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+@media (min-width: 769px) {
+    .perfil {
+        width: 45%; /* Largura para desktop */
+    }
+}
+
+.perfil {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    width: 100%; /* Ajustado para 100% em mobile */
+    min-width: auto; /* Removido min-width para evitar barra de rolagem */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.perfil.ele {
+    border-left: 5px solid #007bff; /* Azul para Ele */
+}
+
+.perfil.ela {
+    border-left: 5px solid #6a0dad; /* Roxo para Ela */
+}
+
+.perfil h2 {
+    margin-top: 0;
+}
+
+.perfil.ele h2 {
+    color: #0056b3; /* Azul mais escuro */
+}
+
+.perfil.ela h2 {
+    color: #4b0082; /* Roxo mais escuro */
+}
+
+.caracteristica-item {
+    background-color: #f9f9f9;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #eee;
+    display: block; /* Mudança para layout vertical */
+}
+
+.caracteristica-item p {
+    margin: 5px 0;
+}
+
+.caracteristica-item p:first-child {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.caracteristica-item .excluir-btn {
+    margin-top: 10px; /* Espaçamento acima do botão */
+}
+
+.formulario-caracteristica input[type="text"] {
+    width: calc(100% - 22px); /* Ajuste para padding e borda */
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.formulario-caracteristica button, .excluir-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.formulario-caracteristica button {
+    background-color: #5cb85c; /* Verde para adicionar */
+    color: white;
+}
+
+.formulario-caracteristica button:hover {
+    background-color: #4cae4c;
+}
+
+.excluir-btn {
+    background-color: #d9534f; /* Vermelho para excluir */
+    color: white;
+    margin-left: 10px;
+}
+
+.excluir-btn:hover {
+    background-color: #c9302c;
+}
+
+@media (max-width: 768px) {
+    .perfis-container {
+        flex-direction: column; /* Empilha os perfis verticalmente no mobile */
+        gap: 15px;
+    }
+    
+    .perfil {
+        width: 100%;
+        min-width: auto;
+        padding: 15px; /* Reduz o padding no mobile */
+    }
+    
+    .formulario-caracteristica input[type="text"] {
+        width: calc(100% - 20px); /* Ajuste para mobile */
+    }
+}
+
+
+.editar-btn {
+    background-color: #007bff; /* Azul para o botão de editar */
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-right: 5px;
+    margin-top: 10px;
+}
+
+.editar-btn:hover {
+    background-color: #0056b3;
+}
+
+.caracteristica-item {
+    background-color: #f9f9f9;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+.caracteristica-item p {
+    margin: 5px 0;
+}
+
+.caracteristica-item p:first-child {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.caracteristica-item .excluir-btn {
+    margin-top: 10px;
+}
