@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosso Calendário</title> <!-- Atualizado para V3 -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/calendario.css">
+</head>
+<body>
+    <header>
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <div class="overlay" id="overlay"></div>
+        <h1>Matheus & Samara
+            <img class="coracaoHeader" src="coracaoFundoTransparente.png" alt="foto do coração">
+        </h1>
+        <nav id="mobileNav">
+            <ul>
+                <li><a href="index.html">Início</a></li>
+                <li><a href="caracteristicas.html">Nossas Características</a></li>
+                <li><a href="calendario.html">Nosso Calendário</a></li>
+                <li><a href="cartas.html">Nossas Cartas</a></li>
+                <li><a href="fotos.html">Nossas Fotos</a></li>
+                <li><a href="videos.html">Nossos Vídeos</a></li>
+                <li><a href="ideias.html">Nossas Ideias</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>Nosso Calendário</h1>
+        <p>Aqui você pode ver as datas importantes que marcaram nossa história e adicionar novos eventos especiais!</p>
+        
+        <div id="cronometro-container">
+            <h2>Tempo Juntos</h2>
+            <p id="cronometro"></p>
+        </div>
+
+        <div id="eventos-container">
+            <h2>Eventos Importantes</h2>
+            <!-- Eventos serão carregados aqui pelo JavaScript -->
+        </div>
+
+        <div id="adicionar-evento-container" class="formulario-container"> <!-- Adicionada classe para estilização -->
+            <h2>Adicionar Novo Evento</h2>
+            <input type="date" id="data-evento">
+            <input type="text" id="titulo-evento" placeholder="Título do Evento">
+            <textarea id="descricao-evento" placeholder="Descrição do Evento"></textarea>
+            <button onclick="adicionarEvento()">Adicionar Evento</button>
+        </div>
+    </main>
+    <footer>
+        <p>DEVELOPED BY MATHEUS</p>
+    </footer>
+    <script src="js/dados.js"></script> <!-- Carrega os dados base -->
+    <script src="js/script.js"></script>
+    <script src="js/menu.js"></script> <!-- Script global se houver -->
+    <script>
+        const EVENTOS_STORAGE_KEY_V3 = 'eventosSiteV3'; // Nova chave para V3
+
+        // Função para carregar eventos do localStorage ou dados base
+        function carregarEventos() {
+            const container = document.getElementById('eventos-container');
+            container.innerHTML = '<h2>Eventos Importantes</h2>'; // Limpar eventos existentes e readicionar título
+
+            let eventos = JSON.parse(localStorage.getItem(EVENTOS_STORAGE_KEY_V3));
+            if (!eventos || eventos.length === 0) {
+                // Se não houver no localStorage, tenta carregar dos dados base e salvar no localStorage
+                eventos = dados.eventosImportantes ? JSON.parse(JSON.stringify(dados.eventosImportantes)) : [];
+                localStorage.setItem(EVENTOS_STORAGE_KEY_V3, JSON.stringify(eventos));
+            }
+            
+            eventos.sort((a, b) => new Date(a.data.split('/').reverse().join('-')) - new Date(b.data.split('/').reverse().join('-'))); // Ordenar por data (DD/MM/AAAA)
+
+            if (eventos.length === 0) {
+                container.innerHTML += '<p>Nenhum evento adicionado ainda.</p>';
+                return;
+            }
+
+            eventos.forEach((evento, index) => {
+                const divEvento = document.createElement('div');
+                divEvento.classList.add('evento-item'); // Classe para estilização individual do evento
+                // Formata a data para DD/MM/AAAA, se não estiver já assim
+                let dataFormatada = evento.data;
+                if (evento.data.includes('-')) { // Se estiver AAAA-MM-DD
+                    const partes = evento.data.split('-');
+                    dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                }
+
+                divEvento.innerHTML = `
+                    <h3>${evento.titulo}</h3>
+                    <p><strong>Data:</strong> ${dataFormatada}</p>
+                    <p>${evento.descricao}</p>
+                    <button class="excluir-btn" onclick="excluirEvento(${index})">Excluir</button>`;
+                container.appendChild(divEvento);
+            });
+        }
+
+        // Função para adicionar um novo evento
+        function adicionarEvento() {
+            const dataInput = document.getElementById('data-evento').value; // Formato AAAA-MM-DD
+            const titulo = document.getElementById('titulo-evento').value.trim();
+            const descricao = document.getElementById('descricao-evento').value.trim();
+
+            if (!dataInput || !titulo || !descricao) {
+                alert('Por favor, preencha todos os campos para adicionar um evento.');
+                return;
+            }
+            // Converter data para DD/MM/AAAA para armazenamento e exibição consistente
+            const partesData = dataInput.split('-');
+            const dataFormatada = `${partesData[2]}/${partesData[1]}/${partesData[0]}`;
+
+            let eventos = JSON.parse(localStorage.getItem(EVENTOS_STORAGE_KEY_V3)) || [];
+            eventos.push({ data: dataFormatada, titulo, descricao });
+            localStorage.setItem(EVENTOS_STORAGE_KEY_V3, JSON.stringify(eventos));
+            
+            // Limpar campos do formulário
+            document.getElementById('data-evento').value = '';
+            document.getElementById('titulo-evento').value = '';
+            document.getElementById('descricao-evento').value = '';
+
+            carregarEventos(); // Recarregar a lista de eventos
+        }
+
+        // Função para excluir um evento
+        function excluirEvento(index) {
+            if (!confirm('Tem certeza que deseja excluir este evento?')) {
+                return;
+            }
+            let eventos = JSON.parse(localStorage.getItem(EVENTOS_STORAGE_KEY_V3)) || [];
+            eventos.splice(index, 1);
+            localStorage.setItem(EVENTOS_STORAGE_KEY_V3, JSON.stringify(eventos));
+            carregarEventos();
+        }
+
+        // Função para calcular e exibir o tempo juntos
+        function atualizarCronometro() {
+            if (dados.dataInicioRelacionamento && dados.dataInicioRelacionamento !== "AAAA-MM-DD") {
+                const dataInicioNamoro = new Date(dados.dataInicioRelacionamento + "T00:00:00");
+                const agora = new Date();
+                const diferenca = agora - dataInicioNamoro;
+
+                const segundosTotal = Math.floor(diferenca / 1000);
+                const dias = Math.floor(segundosTotal / (3600 * 24));
+                const horas = Math.floor((segundosTotal % (3600 * 24)) / 3600);
+                const minutos = Math.floor((segundosTotal % 3600) / 60);
+                const segundos = Math.floor(segundosTotal % 60);
+
+                document.getElementById('cronometro').textContent = 
+                    `${dias} dias, ${horas} horas, ${minutos} minutos e ${segundos} segundos`;
+            } else {
+                document.getElementById('cronometro').textContent = "Defina a data de início do relacionamento em js/dados.js!";
+            }
+        }
+
+        // Carregar eventos e iniciar o cronômetro quando a página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            // Adiciona o título principal no header dinamicamente se não existir
+            const header = document.querySelector('header');
+            if (header && !header.querySelector('h1')) {
+                const mainTitle = document.createElement('h1');
+                mainTitle.textContent = 'Nossa História de Amor';
+                header.insertBefore(mainTitle, header.firstChild);
+            }
+            carregarEventos();
+            atualizarCronometro();
+            setInterval(atualizarCronometro, 1000); // Atualizar a cada segundo
+        });
+    </script>
+</body>
+</html>
