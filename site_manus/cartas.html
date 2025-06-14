@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nossas Cartas - Nossa História de Amor</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/cartas.css">
+    <style>
+        /* Estilos para o Modal da Carta */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.8);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; 
+            padding: 25px;
+            border: 1px solid #888;
+            width: 80%; 
+            max-width: 700px;
+            border-radius: 8px;
+            position: relative;
+        }
+        .modal-content img.anexo-modal {
+            max-width: 100%;
+            max-height: 400px; /* Altura máxima para o anexo no modal */
+            display: block;
+            margin: 15px auto;
+            border-radius: 4px;
+        }
+        .close-btn {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+            text-decoration: none;
+        }
+        .carta-item-preview img {
+            max-width: 150px; /* Tamanho reduzido para o anexo na lista */
+            max-height: 150px;
+            border-radius: 4px;
+            margin-top: 5px;
+            cursor: pointer; /* Indica que é clicável */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <div class="overlay" id="overlay"></div>
+        <h1>Matheus & Samara
+            <img class="coracaoHeader" src="coracaoFundoTransparente.png" alt="foto do coração">
+        </h1>
+        <nav id="mobileNav">
+            <ul>
+                <li><a href="index.html">Início</a></li>
+                <li><a href="caracteristicas.html">Nossas Características</a></li>
+                <li><a href="calendario.html">Nosso Calendário</a></li>
+                <li><a href="cartas.html">Nossas Cartas</a></li>
+                <li><a href="fotos.html">Nossas Fotos</a></li>
+                <li><a href="videos.html">Nossos Vídeos</a></li>
+                <li><a href="ideias.html">Nossas Ideias</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>Nossas Cartas</h1>
+        <p>Relembre as palavras que trocamos ou adicione novas cartas e mensagens especiais. Você também pode anexar uma foto da carta original!</p>
+
+        <div class="formulario-container">
+            <h2>Adicionar Nova Carta</h2>
+            <input type="text" id="carta-titulo" placeholder="Título da Carta">
+            <input type="text" id="carta-remetente" placeholder="De (Seu nome/apelido)">
+            <input type="text" id="carta-destinatario" placeholder="Para (Nome/apelido da pessoa)">
+            <textarea id="carta-conteudo" placeholder="Escreva sua carta aqui..."></textarea>
+            <label for="carta-anexo">Anexar foto da carta (opcional):</label>
+            <input type="file" id="carta-anexo" accept="image/*">
+            <img id="anexo-preview-form" src="#" alt="Prévia do anexo" style="max-width: 150px; max-height: 150px; margin-top: 10px; display: none;">
+            <button id="btn-adicionar-carta">Adicionar Carta</button>
+        </div>
+
+        <div id="cartas-lista-container">
+            <h2>Cartas Guardadas</h2>
+            <!-- Cartas carregadas aqui -->
+        </div>
+
+        <!-- Modal para Tela Cheia da Carta -->
+        <div id="cartaModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="btn-fechar-modal">&times;</span>
+                <h3 id="modal-carta-titulo"></h3>
+                <p><strong>De:</strong> <span id="modal-carta-remetente"></span></p>
+                <p><strong>Para:</strong> <span id="modal-carta-destinatario"></span></p>
+                <div id="modal-carta-conteudo" style="white-space: pre-wrap; margin-bottom:15px;"></div>
+                <img id="modal-carta-anexo" src="#" alt="Anexo da Carta" class="anexo-modal" style="display:none;">
+            </div>
+        </div>
+
+    </main>
+    <footer>
+        <p>DEVELOPED BY MATHEUS</p>
+    </footer>    <script src="js/script.js"></script>
+    <script src="js/menu.js"></script>
+    <script>
+        // Constantes e variáveis globais
+        const CARTAS_STORAGE_KEY_V3 = 'cartasSiteV3';
+        const modal = document.getElementById('cartaModal');
+        let currentAnexoDataUrl = null; // Variável para armazenar o Data URL do anexo atual
+        
+        // Função para carregar cartas do localStorage e renderizar na lista
+        function carregarCartas() {
+            const listaContainer = document.getElementById('cartas-lista-container');
+            listaContainer.innerHTML = '<h2>Cartas Guardadas</h2>';
+            
+            let cartasSalvas = JSON.parse(localStorage.getItem(CARTAS_STORAGE_KEY_V3));
+            if (!cartasSalvas || cartasSalvas.length === 0) {
+                cartasSalvas = dados.cartas ? JSON.parse(JSON.stringify(dados.cartas)) : [];
+                localStorage.setItem(CARTAS_STORAGE_KEY_V3, JSON.stringify(cartasSalvas));
+            }
+
+            if (cartasSalvas.length === 0) {
+                listaContainer.innerHTML += '<p>Nenhuma carta adicionada ainda. Que tal escrever a primeira?</p>';
+                return;
+            }
+
+            cartasSalvas.forEach((carta, index) => {
+                const cartaDiv = document.createElement('div');
+                cartaDiv.classList.add('carta-item');
+                cartaDiv.setAttribute('data-index', index);
+                
+                let anexoHtmlPreview = '';
+                if (carta.anexo) {
+                    anexoHtmlPreview = `<div class="carta-item-preview"><p><strong>Anexo:</strong></p><img src="${carta.anexo}" alt="Foto da carta: ${carta.titulo}"></div>`;
+                }
+                cartaDiv.innerHTML = `
+                    <h3>${carta.titulo || 'Sem Título'}</h3>
+                    <p><strong>De:</strong> ${carta.remetente || 'Desconhecido'}</p>
+                    <p><strong>Para:</strong> ${carta.destinatario || 'Desconhecido'}</p>
+                    <div class="carta-conteudo-preview">${(carta.conteudo || '').substring(0,150).replace(/\n/g, '<br>')}... (Clique para ler mais)</div>
+                    ${anexoHtmlPreview}
+                    <button class="excluir-btn" data-index="${index}">Excluir Carta</button>
+                `;
+                listaContainer.appendChild(cartaDiv);
+                
+                cartaDiv.addEventListener('click', function(event) {
+                    if (!event.target.classList.contains('excluir-btn')) {
+                        abrirModalCarta(index);
+                    }
+                });
+                
+                const btnExcluir = cartaDiv.querySelector('.excluir-btn');
+                btnExcluir.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    excluirCarta(index);
+                });
+            });
+        }
+
+        // Função para adicionar nova carta
+        function adicionarCarta() {
+            const titulo = document.getElementById('carta-titulo').value.trim();
+            const remetente = document.getElementById('carta-remetente').value.trim();
+            const destinatario = document.getElementById('carta-destinatario').value.trim();
+            const conteudo = document.getElementById('carta-conteudo').value.trim();
+            const anexoInput = document.getElementById('carta-anexo');
+            const anexoPreviewForm = document.getElementById('anexo-preview-form');
+
+            if (!titulo || !remetente || !destinatario || !conteudo) {
+                alert('Por favor, preencha título, remetente, destinatário e o conteúdo da carta.');
+                return;
+            }
+
+            let cartasSalvas = JSON.parse(localStorage.getItem(CARTAS_STORAGE_KEY_V3)) || [];
+            
+            // Determina a fonte do anexo - usa a variável global se disponível, senão null
+            let anexoSrc = currentAnexoDataUrl;
+            
+            const novaCarta = {
+                titulo,
+                remetente,
+                destinatario,
+                conteudo,
+                anexo: anexoSrc
+            };
+
+            cartasSalvas.push(novaCarta);
+            localStorage.setItem(CARTAS_STORAGE_KEY_V3, JSON.stringify(cartasSalvas));
+            
+            // Limpa o formulário e a variável global
+            document.getElementById('carta-titulo').value = '';
+            document.getElementById('carta-remetente').value = '';
+            document.getElementById('carta-destinatario').value = '';
+            document.getElementById('carta-conteudo').value = '';
+            anexoInput.value = '';
+            anexoPreviewForm.style.display = 'none';
+            anexoPreviewForm.src = '#';
+            currentAnexoDataUrl = null; // Limpa a variável global
+
+            carregarCartas();
+        }
+
+        // Função para excluir carta
+        function excluirCarta(index) {
+            if (!confirm('Tem certeza que deseja excluir esta carta?')) {
+                return;
+            }
+            let cartasSalvas = JSON.parse(localStorage.getItem(CARTAS_STORAGE_KEY_V3)) || [];
+            cartasSalvas.splice(index, 1);
+            localStorage.setItem(CARTAS_STORAGE_KEY_V3, JSON.stringify(cartasSalvas));
+            carregarCartas();
+        }
+
+        // Funções do Modal
+        function abrirModalCarta(index) {
+            let cartasSalvas = JSON.parse(localStorage.getItem(CARTAS_STORAGE_KEY_V3)) || [];
+            const carta = cartasSalvas[index];
+            if (!carta) return;
+
+            document.getElementById('modal-carta-titulo').textContent = carta.titulo || 'Sem Título';
+            document.getElementById('modal-carta-remetente').textContent = carta.remetente || 'Desconhecido';
+            document.getElementById('modal-carta-destinatario').textContent = carta.destinatario || 'Desconhecido';
+            document.getElementById('modal-carta-conteudo').innerHTML = (carta.conteudo || '').replace(/\n/g, '<br>');
+            
+            const anexoImgModal = document.getElementById('modal-carta-anexo');
+            if (carta.anexo) {
+                anexoImgModal.src = carta.anexo;
+                anexoImgModal.style.display = 'block';
+            } else {
+                anexoImgModal.style.display = 'none';
+            }
+            modal.style.display = 'block';
+        }
+
+        function fecharModalCarta() {
+            modal.style.display = 'none';
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarCartas();
+            
+            const btnAdicionarCarta = document.getElementById('btn-adicionar-carta');
+            btnAdicionarCarta.addEventListener('click', adicionarCarta);
+            
+            const btnFecharModal = document.getElementById('btn-fechar-modal');
+            btnFecharModal.addEventListener('click', fecharModalCarta);
+            
+            window.addEventListener('click', function(event) {
+                if (event.target == modal) {
+                    fecharModalCarta();
+                }
+            });
+            
+            const cartaAnexo = document.getElementById('carta-anexo');
+            cartaAnexo.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                const preview = document.getElementById('anexo-preview-form');
+                
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        currentAnexoDataUrl = e.target.result; // Armazena o Data URL na variável global
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.src = '#';
+                    preview.style.display = 'none';
+                    currentAnexoDataUrl = null; // Limpa a variável global se nenhum arquivo for selecionado
+                }
+            });
+        });
+    </script>
+</body>
+</html>
